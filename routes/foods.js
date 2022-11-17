@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 
 connection.connect();
 router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({extended:true}));
 
 
 router.get('/ranking', function (req, res){
@@ -38,12 +39,73 @@ router.get('/ranking', function (req, res){
     })
 });
 
+router.get('/recommend', function (req, res){
+    var resultCode = 404;
+    var message = '에러가 발생했습니다.'
+
+    var sql = 'SELECT * FROM Foods ORDER BY RAND() LIMIT 10'
+    connection.query(sql, function(err, result){
+        if (err){
+            console.log(err);
+        }else{
+            resultCode = 200;
+            message = '성공';
+            var data = [];
+            for(let i = 0; i < result.length; i++){
+                let food = {
+                    'name' : result[i].name,
+                    'company' : result[i].company,
+                    'imgUrl' : result[i].imgUrl
+                };
+                data.push(food);
+            }
+        }
+
+        res.json({
+            'code' : resultCode,
+            'message' : message, data
+        });
+    })
+});
+
 router.get('/chicken', function (req, res){
     var resultCode = 404;
     var message = '에러가 발생했습니다.'
 
     var sql = 'SELECT * FROM ChickenStores'
     connection.query(sql, function(err, result){
+        if (err){
+            console.log(err);
+        }else{
+            resultCode = 200;
+            message = '성공';
+            var data = [];
+            for(let i = 0; i < result.length; i++){
+                let food = {
+                    'id' : result[i].id,
+                    'name' : result[i].name,
+                    'minPrice' : result[i].minPrice,
+                    'deliveryTip' : result[i].deliveryTip,
+                    'imgUrl' : result[i].imgUrl
+                };
+                data.push(food);
+            }
+        }
+
+        res.json({
+            'code' : resultCode,
+            'message' : message, data
+        });
+    })
+});
+
+router.get('/chicken/find', function (req, res){
+    var resultCode = 404;
+    var message = '에러가 발생했습니다.'
+    const cid = req.query.id
+
+    var sql = 'SELECT * FROM ChickenStores WHERE id=?'
+    connection.query(sql, cid, function(err, result){
         if (err){
             console.log(err);
         }else{
