@@ -79,15 +79,4 @@ router.get('/offline', function (req, res){
     })
 });
 
-
-
-
-
-
-
-
-
-
-
 module.exports = router;
-

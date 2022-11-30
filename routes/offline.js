@@ -129,35 +129,88 @@ router.post('/update', function (req, res){
 
 
 
-router.post('/temp', function (req, res){
-    const UID = req.body.UID;
+
+
+
+
+
+
+
+
+
+router.post('/asd', function (req, res){
+    const storeName2 = req.query.storeName2;
+    const name = req.query.userName;
+    const matchNum1 = req.query.matchNum;
+    const matchNum = parseInt(matchNum1);
+    const location = req.query.location;
     var resultCode = 404;
     var message = '에러가 발생했습니다.'
 
-    connection.query('delete from PreMatching where name=?', UID, function(err, result){
+
+
+    var sql = 'SELECT count(*) as cnt From PreMatching WHERE matchNum=? and storeName2=? and location=? and state="finish"'
+
+    connection.query(sql,[matchNum,storeName2,location],function(err, sum){
         if (err){
             console.log(err);
         }else{
-            resultCode = 200;
-            message = '성공';
+            //두번쨰쿼리
+            if(sum[0].cnt==matchNum){
+                console.log(sum);
+                var sql2 = 'SELECT * FROM PreMatching WHERE matchNum=? and storeName2=? and location=? '
+                connection.query(sql2,[matchNum,storeName2,location],function (err,result){
+                    if (err){
+                        console.log(err);
+                    }
+                    else{
+
+                        resultCode = 200;
+                        message = '성공';
+                        var data = [];
+                        for(let i = 0; i < result.length; i++){
+                            let tName = result[i].name;
+                            let tStore = result[i].storeName2;
+                            let tDeliveryFood = result[i].deliveryFood;
+                            let tPrice = result[i].totalPrice;
+
+                            var sql3 = 'INSERT INTO OrderList(name,store,deliveryFood,price,state,matchNum,location) VALUES(?,?,?,?,"결제 완료",?,?)'
+                            connection.query(sql3,[tName,tStore,tDeliveryFood,tPrice,matchNum,location],function (err,end){
+                                if (err){
+                                    console.log(err);
+                                }
+                                else{
+                                    res.json({
+                                        'code' : resultCode,
+                                        'message' : message
+                                    });
+                                }
+
+                                //세번쨰 퀄리끝
+                            })
+                        }
+
+
+                    }
+
+                    //두번쨰쿼리끝
+                })
+
+            }
+            else{
+                console.log("오지마");
+
+
+            }
+
 
 
         }
 
-        res.json({
-            'code' : resultCode,
-            'message' : message
-        });
+
     })
 });
 
 
-
-
-
-
-
-
-
-
 module.exports = router;
+

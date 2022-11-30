@@ -16,4 +16,3 @@ app.use('/offline', offlineRouter);
 app.listen(3000, '172.31.1.63', function () {
     console.log('서버 실행 중...');
 });
-
